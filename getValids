@@ -1,9 +1,11 @@
+#!/usr/bin/lua
 local function getMove(r,c) return g_board[r][c]:sub(3,3) end
 local function getPiece(r,c) return g_board[r][c]:sub(2,2) end
 local function getColor(r,c) return g_board[r][c]:sub(1,1) end
 g_valids = {}
 local function ins(a) table.insert(g_valids,a) end
-local function rook_move(r,c)
+local function check_move(r,c)
+  if r>8 or r<1 or c>8 or c<1 then return true end
   if getPiece(r,c)=="." then
     ins({r=r, c=c, attack=false})
     return false
@@ -12,42 +14,69 @@ local function rook_move(r,c)
     return true
   end return true
 end
-piece = getPiece(g_r,g_c)
-color = getColor(g_r,g_c)
-move = getMove(g_r,g_c)
+local piece = getPiece(g_r,g_c)
+local color = getColor(g_r,g_c)
+local move = getMove(g_r,g_c)
 if piece=="P" then
   local dir = -1
   if color=="b" then dir = 1 end
   if getPiece(g_r+dir,g_c)=="." then
-    print("A")
     ins({r=g_r+dir, c=g_c, attack=false})
   end if move=="." and getPiece(g_r+dir+dir,g_c)=="." then
-    print("B")
     ins({r=g_r+dir+dir, c=g_c, attack=false})
   end if getPiece(g_r+dir,g_c+1)~="." and getColor(r+dir,c+1)~=color then
-    print("C")
     ins({r=g_r+dir, c=g_c+1, attack=true})
   end if getPiece(g_r+dir,g_c-1)~="." and getColor(r+dir,c-1)~=color then
-    print("D")
     ins({r=g_r+dir, c=g_c-1, attack=true})
   end 
-  --en passant handling below
+  --en passant handling from here...
   if ((color=="b" and g_r==5) or (color=="w" and g_r==4)) then
-    print("En Passant Maybe")
     if getPiece(g_r, g_c-1)=="P" and getMove(g_r, g_c-1)=="f" then
       ins({r=g_r+dir, c=g_c-1, attack=true})
     end if getPiece(g_r, g_c+1)=="P" and getMove(g_r, g_c+1)=="f" then
       ins({r=g_r+dir, c=g_c+1, attack=true})
     end
   end
+  --to here
 elseif piece=="R" then
   for i=g_r-1,1,-1 do
-    if rook_move(i,g_c) then break end
+    if check_move(i,g_c) then break end
   end for i=g_r+1,8 do
-    if rook_move(i,g_c) then break end  
+    if check_move(i,g_c) then break end  
   end for i=g_c-1,1,-1 do
-    if rook_move(g_r,i) then break end
+    if check_move(g_r,i) then break end
   end for i=g_c+1,8 do
-    if rook_move(g_r,i) then break end
+    if check_move(g_r,i) then break end
+  end
+elseif piece=="N" then
+  local dc = {-2,-1,1,2}
+  local dr = { 1, 2,2,1}
+  for i=1,4 do 
+    check_move(g_r+dr[i], g_c+dc[i]) 
+    check_move(g_r-dr[i], g_c-dc[i])
+  end
+elseif piece=="B" then
+  local a= {true,true,true,true}
+  for i=1, 8 do
+    if a[1] and check_move(g_r-i,g_c-i) then a[1]=false end
+    if a[2] and check_move(g_r-i,g_c+i) then a[2]=false end
+    if a[3] and check_move(g_r+i,g_c-i) then a[3]=false end
+    if a[4] and check_move(g_r+i,g_c+i) then a[4]=false end
+  end
+elseif piece=="K" then
+  for r=g_r-1, g_r+1 do
+    for c=g_c-1, g_c+1 do
+      check_move(r,c)
+    end
+  end
+elseif piece=="Q" then
+  g_board[g_r][g_c]="R"
+  shell.run("getValids")
+  local rookok = g_valids
+  g_board[g_r][g_c]="B"
+  shell.run("getValids")
+  g_board[g_r][g_c]="Q"
+  for i=1, #rookok do
+    ins(rookok[i])
   end
 end

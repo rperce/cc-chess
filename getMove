@@ -1,17 +1,18 @@
+#!/usr/bin/lua
 local mon = peripheral.wrap("right")
-function getRC(x, y) return math.floor((y-1)/2), math.floor(x/3) end
-function getColor(m) return string.sub(m,1,1) end
-function getPiece(m) return string.sub(m,2,2) end
-function setValids(r,c) 
+local function getRC(x, y) return math.floor((y-1)/2), math.floor(x/3) end
+local function getColor(m) return string.sub(m,1,1) end
+local function getPiece(m) return string.sub(m,2,2) end
+local function setValids(r,c) 
   g_r = r g_c = c
   shell.run("getValids")
 end
-function greenColor(r,c)
+local function greenColor(r,c)
   if (r%2==0 and c%2==0) or (r%2==1 and c%2==1) then
     return colors.lime
   else return colors.green end
 end
-function selColor(r,c,bg)
+local function selColor(r,c,bg)
   if g_shortcolor=="w" then 
     mon.setTextColor(colors.white)
   else mon.setTextColor(colors.black) end
@@ -24,17 +25,25 @@ function selColor(r,c,bg)
   mon.write(getPiece(g_board[r][c]))
 end
   
-local e, side, x, y = os.pullEvent("monitor_touch")
-local r, c = getRC(x,y)
-if getColor(g_board[r][c])==g_shortcolor then
-  setValids(r,c)
-  if #g_valids>0 then
-    selColor(r,c,colors.yellow)
+local selected = false
+repeat
+  local e, side, x, y = os.pullEvent("monitor_touch")
+  local r, c = getRC(x,y)
+  if getColor(g_board[r][c])==g_shortcolor then
+    setValids(r,c)
+    if #g_valids>0 then
+      shell.run("printBoard")
+      selColor(r,c,colors.yellow)
+      for i=1,#g_valids do
+        if g_valids[i].attack then
+          selColor(g_valids[i].r,g_valids[i].c,colors.red)
+        else selColor(g_valids[i].r,g_valids[i].c,greenColor(g_valids[i].r,g_valids[i].c)) end
+      end 
+    end
+  else
     for i=1,#g_valids do
-      if g_valids[i].attack then
-        selColor(g_valids[i].r,g_valids[i].c,colors.red)
-      else selColor(g_valids[i].r,g_valids[i].c,greenColor(g_valids[i].r,g_valids[i].c)) end
-    end 
+
+    end
   end
-end
+until selected
 local e, side, x, y = os.pullEvent("monitor_touch")
