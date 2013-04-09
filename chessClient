@@ -1,0 +1,15 @@
+shell.run("globals")
+while true do
+local id, m = rednet.receive()
+if id==serv_id then
+  g_message = string.sub(m,2)
+  if string.sub(m,1,1)=="t" then
+    shell.run("turnDisp")
+  elseif string.sub(m,1,1)=="p" then
+    shell.run("printBoard") --sets g_board
+  elseif string.sub(m,1,1)=="g" then
+    shell.run("getMove") --sets g_message
+    rednet.send(serv_id, g_message)
+  end
+end
+end

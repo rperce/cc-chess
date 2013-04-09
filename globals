@@ -1,0 +1,8 @@
+rednet.open("bottom")
+g_message = " "
+g_board = {}
+g_shortcolor = "w"
+g_longcolor = "White"
+g_r = 1
+g_c = 1
+serv_id=65

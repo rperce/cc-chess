@@ -1,0 +1,53 @@
+local function getMove(r,c) return g_board[r][c]:sub(3,3) end
+local function getPiece(r,c) return g_board[r][c]:sub(2,2) end
+local function getColor(r,c) return g_board[r][c]:sub(1,1) end
+g_valids = {}
+local function ins(a) table.insert(g_valids,a) end
+local function rook_move(r,c)
+  if getPiece(r,c)=="." then
+    ins({r=r, c=c, attack=false})
+    return false
+  elseif getColor(r,c)~=color then
+    ins({r=r, c=c, attack=true})
+    return true
+  end return true
+end
+piece = getPiece(g_r,g_c)
+color = getColor(g_r,g_c)
+move = getMove(g_r,g_c)
+if piece=="P" then
+  local dir = -1
+  if color=="b" then dir = 1 end
+  if getPiece(g_r+dir,g_c)=="." then
+    print("A")
+    ins({r=g_r+dir, c=g_c, attack=false})
+  end if move=="." and getPiece(g_r+dir+dir,g_c)=="." then
+    print("B")
+    ins({r=g_r+dir+dir, c=g_c, attack=false})
+  end if getPiece(g_r+dir,g_c+1)~="." and getColor(r+dir,c+1)~=color then
+    print("C")
+    ins({r=g_r+dir, c=g_c+1, attack=true})
+  end if getPiece(g_r+dir,g_c-1)~="." and getColor(r+dir,c-1)~=color then
+    print("D")
+    ins({r=g_r+dir, c=g_c-1, attack=true})
+  end 
+  --en passant handling below
+  if ((color=="b" and g_r==5) or (color=="w" and g_r==4)) then
+    print("En Passant Maybe")
+    if getPiece(g_r, g_c-1)=="P" and getMove(g_r, g_c-1)=="f" then
+      ins({r=g_r+dir, c=g_c-1, attack=true})
+    end if getPiece(g_r, g_c+1)=="P" and getMove(g_r, g_c+1)=="f" then
+      ins({r=g_r+dir, c=g_c+1, attack=true})
+    end
+  end
+elseif piece=="R" then
+  for i=g_r-1,1,-1 do
+    if rook_move(i,g_c) then break end
+  end for i=g_r+1,8 do
+    if rook_move(i,g_c) then break end  
+  end for i=g_c-1,1,-1 do
+    if rook_move(g_r,i) then break end
+  end for i=g_c+1,8 do
+    if rook_move(g_r,i) then break end
+  end
+end

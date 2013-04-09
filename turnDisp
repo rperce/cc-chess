@@ -1,0 +1,9 @@
+local match="White"
+local mon = peripheral.wrap("right")
+mon.setBackgroundColor(colors.black)
+if g_message==match then
+  mon.setTextColor(colors.lime)
+else mon.setTextColor(colors.red) end
+mon.setCursorPos(28,2)
+mon.write(g_message.."'s Turn")
+  
