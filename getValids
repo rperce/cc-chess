@@ -1,4 +1,3 @@
-#!/usr/bin/lua
 local function getMove(r,c) return g_board[r][c]:sub(3,3) end
 local function getPiece(r,c) return g_board[r][c]:sub(2,2) end
 local function getColor(r,c) return g_board[r][c]:sub(1,1) end
@@ -7,10 +6,10 @@ local function ins(a) table.insert(g_valids,a) end
 local function check_move(r,c)
   if r>8 or r<1 or c>8 or c<1 then return true end
   if getPiece(r,c)=="." then
-    ins({r=r, c=c, attack=false})
+    ins({r=r, c=c, attack={false,r,c}})
     return false
   elseif getColor(r,c)~=color then
-    ins({r=r, c=c, attack=true})
+    ins({r=r, c=c, attack={true,r,c}})
     return true
   end return true
 end
@@ -21,20 +20,20 @@ if piece=="P" then
   local dir = -1
   if color=="b" then dir = 1 end
   if getPiece(g_r+dir,g_c)=="." then
-    ins({r=g_r+dir, c=g_c, attack=false})
+    ins({r=g_r+dir, c=g_c, attack={false,g_r+dir,g_c}})
   end if move=="." and getPiece(g_r+dir+dir,g_c)=="." then
-    ins({r=g_r+dir+dir, c=g_c, attack=false})
+    ins({r=g_r+dir+dir, c=g_c, attack={false,g_r+dir+dir,g_c}})
   end if getPiece(g_r+dir,g_c+1)~="." and getColor(r+dir,c+1)~=color then
-    ins({r=g_r+dir, c=g_c+1, attack=true})
+    ins({r=g_r+dir, c=g_c+1, attack={true, g_r+dir, g+c+1}})
   end if getPiece(g_r+dir,g_c-1)~="." and getColor(r+dir,c-1)~=color then
-    ins({r=g_r+dir, c=g_c-1, attack=true})
+    ins({r=g_r+dir, c=g_c-1, attack={true,g_r+dir,g_c-1}})
   end 
   --en passant handling from here...
   if ((color=="b" and g_r==5) or (color=="w" and g_r==4)) then
     if getPiece(g_r, g_c-1)=="P" and getMove(g_r, g_c-1)=="f" then
-      ins({r=g_r+dir, c=g_c-1, attack=true})
+      ins({r=g_r+dir, c=g_c-1, attack={true,g_r,g_c-1}})
     end if getPiece(g_r, g_c+1)=="P" and getMove(g_r, g_c+1)=="f" then
-      ins({r=g_r+dir, c=g_c+1, attack=true})
+      ins({r=g_r+dir, c=g_c+1, attack={true,g_r,g_c+1}})
     end
   end
   --to here

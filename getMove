@@ -1,4 +1,3 @@
-#!/usr/bin/lua
 local mon = peripheral.wrap("right")
 local function getRC(x, y) return math.floor((y-1)/2), math.floor(x/3) end
 local function getColor(m) return string.sub(m,1,1) end
@@ -26,6 +25,8 @@ local function selColor(r,c,bg)
 end
   
 local selected = false
+local selr = 1
+local selc = 1
 repeat
   local e, side, x, y = os.pullEvent("monitor_touch")
   local r, c = getRC(x,y)
@@ -34,15 +35,22 @@ repeat
     if #g_valids>0 then
       shell.run("printBoard")
       selColor(r,c,colors.yellow)
+      selr = r
+      selc = c
       for i=1,#g_valids do
-        if g_valids[i].attack then
+        if g_valids[i].attack[0] then
           selColor(g_valids[i].r,g_valids[i].c,colors.red)
         else selColor(g_valids[i].r,g_valids[i].c,greenColor(g_valids[i].r,g_valids[i].c)) end
       end 
     end
   else
     for i=1,#g_valids do
-
+      if r==g_valids[i].r and c==g_valids[i].c then
+        if g_valids[i].attack[0] then g_board[g_valids[i].attack.r][g_valids[i].attack.c] = "..." end
+        g_board[r][c] = g_board[selr][selc]
+        g_board[selr][selc] = "..."
+        selected = true
+      end
     end
   end
 until selected
